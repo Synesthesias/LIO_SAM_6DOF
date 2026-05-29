@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(rviz_satellite)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS ON)
+
 find_package(PkgConfig REQUIRED)
 
 pkg_check_modules(OGRE_OV OGRE OGRE-Overlay)
@@ -76,7 +80,7 @@ link_libraries(
 )
 
 # set compiler options and inject version of software (see tileloader.cpp)
-add_definitions("-Wall -Wunused -std=c++11 -DRVIZ_SATELLITE_VERSION=\"\\\"${rviz_satellite_VERSION}\\\"\"")
+add_definitions("-Wall -Wunused -DRVIZ_SATELLITE_VERSION=\"\\\"${rviz_satellite_VERSION}\\\"\"")
 
 set(PROJECT_SOURCE_FILES
   ${${PROJECT_NAME}_SOURCES}

@@ -18,15 +18,17 @@ DataSaver::DataSaver(string _base_dir, string _sequence_name) {
     save_directory = _base_dir + sequence_name + '/';
     std::cout << "SAVE DIR:" << save_directory << std::endl;
 
-    auto unused = system((std::string("exec rm -r ") + save_directory).c_str());
-    unused = system((std::string("mkdir -p ") + save_directory).c_str());
+    int rm_result = system((std::string("exec rm -r ") + save_directory).c_str());
+    int mkdir_result = system((std::string("mkdir -p ") + save_directory).c_str());
+    (void)rm_result;
+    (void)mkdir_result;
 }
 
 void DataSaver::saveOptimizedVerticesTUM(gtsam::Values _estimates) {
     std::fstream stream(save_directory + "optimized_odom_tum.txt",
                         std::fstream::out);
     stream.precision(15);
-    for (int i = 0; i < _estimates.size(); i++) {
+    for (size_t i = 0; i < _estimates.size(); ++i) {
         auto &pose = _estimates.at(i).cast<gtsam::Pose3>();
         gtsam::Point3 p = pose.translation();
         gtsam::Quaternion q = pose.rotation().toQuaternion();
@@ -45,8 +47,10 @@ void DataSaver::setDir(string _base_dir, string _sequence_name) {
     }
     save_directory = _base_dir + sequence_name + '/';
 
-    auto unused = system((std::string("exec rm -r ") + save_directory).c_str());
-    unused = system((std::string("mkdir -p ") + save_directory).c_str());
+    int rm_result = system((std::string("exec rm -r ") + save_directory).c_str());
+    int mkdir_result = system((std::string("mkdir -p ") + save_directory).c_str());
+    (void)rm_result;
+    (void)mkdir_result;
 }
 
 void DataSaver::setConfigDir(string _config_dir) {
@@ -134,7 +138,7 @@ void DataSaver::saveOdometryVerticesTUM(
         std::vector<nav_msgs::Odometry> keyframePosesOdom) {
     std::fstream stream(save_directory + "odom_tum.txt", std::fstream::out);
     stream.precision(15);
-    for (int i = 0; i < keyframePosesOdom.size(); i++) {
+    for (size_t i = 0; i < keyframePosesOdom.size(); ++i) {
         nav_msgs::Odometry odometry = keyframePosesOdom.at(i);
         double time = odometry.header.stamp.toSec();
         // check the size of keyframeTimes
@@ -165,9 +169,8 @@ void DataSaver::saveGraph(std::vector<nav_msgs::Odometry> keyframePosesOdom) {
     g2o_outfile.precision(15);
     // g2o_outfile << std::fixed << std::setprecision(9);
 
-    for (int i = 0; i < keyframePosesOdom.size(); i++) {
+    for (size_t i = 0; i < keyframePosesOdom.size(); ++i) {
         nav_msgs::Odometry odometry = keyframePosesOdom.at(i);
-        double time = odometry.header.stamp.toSec();
 
         g2o_outfile << "VERTEX_SE3:QUAT " << std::to_string(i) << " ";
         g2o_outfile << odometry.pose.pose.position.x << " ";
@@ -190,13 +193,13 @@ void DataSaver::saveResultBag(std::vector<nav_msgs::Odometry> allOdometryVec,
 
     //  LOG(INFO) << "ODOM AND PCD SIZE:" << allOdometryVec.size() << ", " <<
     //  allResVec.size();
-    for (int i = 0; i < allOdometryVec.size(); i++) {
+    for (size_t i = 0; i < allOdometryVec.size(); ++i) {
         nav_msgs::Odometry _laserOdometry = allOdometryVec.at(i);
         result_bag.write("pgo_odometry", _laserOdometry.header.stamp,
                          _laserOdometry);
     }
 
-    for (int i = 0; i < allResVec.size(); i++) {
+    for (size_t i = 0; i < allResVec.size(); ++i) {
         sensor_msgs::PointCloud2 _laserCloudFullRes = allResVec.at(i);
         result_bag.write("cloud_deskewed", _laserCloudFullRes.header.stamp,
                          _laserCloudFullRes);
@@ -217,7 +220,7 @@ void DataSaver::saveResultBag(
     //  LOG(INFO) << "ODOM AND PCD SIZE:" << allOdometryVec.size() << ", " <<
     //  allResVec.size();
     tf2_msgs::TFMessage tf_message;
-    for (int i = 0; i < allOdometryVec.size(); i++) {
+    for (size_t i = 0; i < allOdometryVec.size(); ++i) {
         nav_msgs::Odometry _laserOdometry = allOdometryVec.at(i);
         result_bag.write("pgo_odometry", _laserOdometry.header.stamp,
                          _laserOdometry);
@@ -333,7 +336,7 @@ void DataSaver::savePointCloudMap(
     std::cout << "odom and cloud size: " << allOdometryVec.size() << ", "
               << allResVec.size();
 
-    int odom_size = std::min(allOdometryVec.size(), allResVec.size());
+    size_t odom_size = std::min(allOdometryVec.size(), allResVec.size());
 
     if (allOdometryVec.size() != allResVec.size()) {
         std::cout << " point cloud size do not equal to odom size!";
@@ -346,7 +349,7 @@ void DataSaver::savePointCloudMap(
             new pcl::PointCloud<PointT>());  // giseop
     pcl::PointCloud<PointT>::Ptr globalmap(
             new pcl::PointCloud<PointT>());  // giseop
-    for (int i = 0; i < odom_size; ++i) {
+    for (size_t i = 0; i < odom_size; ++i) {
         nav_msgs::Odometry odom = allOdometryVec.at(i);
         laserCloudRaw = allResVec.at(i);
 
@@ -376,13 +379,13 @@ void DataSaver::savePointCloudMap(
                                       *globalmap);
             cout << "current scan saved to : " << save_directory << ", "
                  << globalmap->points.size() << endl;
-        } catch (std::exception e) {
-            ROS_ERROR("SAVE PCD ERROR", globalmap->points.size());
+        } catch (const std::exception& e) {
+            ROS_ERROR("SAVE PCD ERROR: %zu points, %s", globalmap->points.size(), e.what());
         }
 
         // all cloud must rotate to body axis
         if (use_imu_frame) {
-            for (int j = 0; j < globalmap->points.size(); ++j) {
+            for (size_t j = 0; j < globalmap->points.size(); ++j) {
                 PointT &pt = globalmap->points.at(j);
                 Eigen::Vector3d translation(pt.x, pt.y, pt.z);
                 translation = q_body_sensor * translation + t_body_sensor;
@@ -396,8 +399,8 @@ void DataSaver::savePointCloudMap(
                                           *globalmap);
                 cout << "current scan saved to : " << save_directory << ", "
                      << globalmap->points.size() << endl;
-            } catch (std::exception e) {
-                ROS_ERROR("SAVE PCD ERROR", globalmap->points.size());
+            } catch (const std::exception& e) {
+                ROS_ERROR("SAVE PCD ERROR: %zu points, %s", globalmap->points.size(), e.what());
             }
         }
     } else
@@ -412,8 +415,8 @@ void DataSaver::savePointCloudMap(pcl::PointCloud<PointT> &cloud_ptr) {
     try {
         pcl::io::savePCDFileASCII(save_directory + "globalmap_lidar_feature.pcd",
                                   cloud_ptr);
-    } catch (pcl::IOException) {
-        std::cout << "  save map failed!!! " << cloud_ptr.size() << std::endl;
+    } catch (const pcl::IOException& e) {
+        std::cout << "  save map failed!!! " << cloud_ptr.size() << " (" << e.what() << ")" << std::endl;
 
     }
 
@@ -511,7 +514,7 @@ int DataSaver::saveKMLTrajectory(const std::vector<Eigen::Vector3d> lla_vec) {
           << endl;
     ofile << "<coordinates>" << endl;
 
-    for (int i = 0; i < lla_vec.size(); i++) {
+    for (size_t i = 0; i < lla_vec.size(); ++i) {
         ofile << lla_vec.at(i)[1] << ',' << lla_vec.at(i)[0] << ','
               << lla_vec.at(i)[2] << endl;
     }

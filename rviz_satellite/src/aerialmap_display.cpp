@@ -62,7 +62,7 @@ Ogre::TexturePtr textureFromImage(const QImage& image,
   Ogre::TexturePtr texture;
   Ogre::DataStreamPtr data_stream;
   data_stream.bind(new Ogre::MemoryDataStream((void*)converted.constBits(),
-                                              converted.byteCount()));
+                                              converted.sizeInBytes()));
 
   const Ogre::String res_group =
       Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME;

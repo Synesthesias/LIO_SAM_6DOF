@@ -2,8 +2,10 @@ cmake_minimum_required(VERSION 2.8.3)
 project(lio_sam_6axis)
 
 set(CMAKE_BUILD_TYPE "Release")
-set(CMAKE_CXX_FLAGS "-std=c++14")
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_FLAGS "-std=c++17")
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS ON)
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall -g -pthread")
 find_package(Boost REQUIRED COMPONENTS timer)
 find_package(catkin REQUIRED COMPONENTS

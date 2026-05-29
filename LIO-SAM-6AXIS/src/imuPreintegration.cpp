@@ -46,7 +46,7 @@ public:
                                             ros::Duration(3.0));
                 tfListener.lookupTransform(lidarFrame, baselinkFrame, ros::Time(0),
                                            lidar2Baselink);
-            } catch (tf::TransformException ex) {
+                        } catch (const tf::TransformException& ex) {
                 ROS_ERROR("%s", ex.what());
             }
         }
@@ -214,8 +214,7 @@ public:
         pubImuOdometry =
                 nh.advertise<nav_msgs::Odometry>(odomTopic + "_incremental", 2000);
 
-        boost::shared_ptr<gtsam::PreintegrationParams> p =
-                gtsam::PreintegrationParams::MakeSharedU(imuGravity);
+        auto p = gtsam::PreintegrationParams::MakeSharedU(imuGravity);
         p->accelerometerCovariance =
                 gtsam::Matrix33::Identity(3, 3) *
                 pow(imuAccNoise, 2);  // acc white noise in continuous

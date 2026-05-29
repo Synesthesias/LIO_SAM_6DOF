@@ -533,7 +533,7 @@ public:
         // pcl::PointCloud<PointType>::Ptr temp_ptr(new pcl::PointCloud<PointType>);
         std::vector<nav_msgs::Odometry> keyframePosesOdom;
 
-        for (int i = 0; i < cloudKeyPoses6D->size(); ++i) {
+        for (size_t i = 0; i < cloudKeyPoses6D->size(); ++i) {
             mtx.lock();
             PointTypePose p = cloudKeyPoses6D->at(i);
             mtx.unlock();
@@ -885,7 +885,7 @@ public:
         // sometimes we need to find the corressponding loop pairs
         // but we do not need to care about the z values of these poses.
         // Pls note that this is not work for stair case
-        for (int i = 0; i < copy_cloudKeyPoses2D->size(); ++i) {
+        for (size_t i = 0; i < copy_cloudKeyPoses2D->size(); ++i) {
             copy_cloudKeyPoses2D->at(i).z = 0;
         }
 
@@ -913,7 +913,7 @@ public:
         // accuracy. For example, the lidar starts to move after being stationary
         // for 30s in a certain place. At this time, the IMU should be trusted more
         // than the lidar.
-        if (keyframeDistances.size() >= loopKeyCur) {
+        if (keyframeDistances.size() >= static_cast<size_t>(loopKeyCur)) {
             double distance = 0.0;
             for (int j = loopKeyPre; j < loopKeyCur; ++j) {
                 distance += keyframeDistances.at(j);
@@ -1274,7 +1274,7 @@ public:
                 new pcl::PointCloud<PointType>());
         int numPoses = cloudKeyPoses3D->size();
         for (int i = numPoses - 1; i >= 0; --i) {
-            if (cloudToExtract->size() <= surroundingKeyframeSize)
+            if (cloudToExtract->size() <= static_cast<size_t>(surroundingKeyframeSize))
                 cloudToExtract->push_back(cloudKeyPoses3D->points[i]);
             else
                 break;
@@ -1949,13 +1949,13 @@ public:
             // pose graph will crashed if giving some respectively bad gps points at
             // first.
             if (keyframeGPSfactor.size() < 20) {
-                ROS_INFO("Accumulated gps factor: %d", keyframeGPSfactor.size());
+                ROS_INFO("Accumulated gps factor: %zu", keyframeGPSfactor.size());
                 return;
             }
 
             if (!gpsTransfromInit) {
                 ROS_INFO("Initialize GNSS transform!");
-                for (int i = 0; i < keyframeGPSfactor.size(); ++i) {
+                for (size_t i = 0; i < keyframeGPSfactor.size(); ++i) {
                     gtsam::GPSFactor gpsFactor = keyframeGPSfactor.at(i);
                     gtSAMgraph.add(gpsFactor);
                     gpsIndexContainer[gpsFactor.key()] = i;
@@ -2377,7 +2377,7 @@ public:
             pubPath.publish(globalPath);
         }
         // publish SLAM infomation for 3rd-party usage
-        static int lastSLAMInfoPubSize = -1;
+        static size_t lastSLAMInfoPubSize = static_cast<size_t>(-1);
         if (pubSLAMInfo.getNumSubscribers() != 0) {
             if (lastSLAMInfoPubSize != cloudKeyPoses6D->size()) {
                 lio_sam_6axis::cloud_info slamInfo;
